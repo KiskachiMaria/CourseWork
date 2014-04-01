@@ -57,10 +57,10 @@ namespace CourseWork
 				return "66";
 			if(reg == "98")
 				return "78";
-//			if(reg == "50")
-//				return "77";
-//			if(reg == "47")
-//				return "78";
+			if(reg == "50")
+				return "77";
+			if(reg == "47")
+				return "78";
 //			Питер и Москва с облостями
 			return reg;
 		}
@@ -144,29 +144,29 @@ namespace CourseWork
 								reg = true;
 							else
 								cou = true;
-							
-							if(cou)
-								longerInsertCountr++;
-							else if(reg)
-							{
-								longerInsertCountr++;
-								longerInsertReg++;
-								if(!longerRegionReg.ContainsKey(regionFrom))
-									longerRegionReg[regionFrom] = 0;
-								longerRegionReg[regionFrom]++;
-							}
-							else if(ins)
-							{
-								longerInsertCountr++;
-								longerInsertInsp++;
-								longerInsertReg++;
-								if(!longerRegionInsp.ContainsKey(regionFrom))
-									longerRegionInsp[regionFrom] = 0;
-								if(!longerRegionReg.ContainsKey(regionFrom))
-									longerRegionReg[regionFrom] = 0;
-								longerRegionReg[regionFrom]++;
-								longerRegionInsp[regionFrom]++;
-							}
+						}
+
+						if(cou)
+							longerInsertCountr++;
+						else if(reg)
+						{
+							longerInsertCountr++;
+							longerInsertReg++;
+							if(!longerRegionReg.ContainsKey(regionFrom))
+								longerRegionReg[regionFrom] = 0;
+							longerRegionReg[regionFrom]++;
+						}
+						else if(ins)
+						{
+							longerInsertCountr++;
+							longerInsertInsp++;
+							longerInsertReg++;
+							if(!longerRegionInsp.ContainsKey(regionFrom))
+								longerRegionInsp[regionFrom] = 0;
+							if(!longerRegionReg.ContainsKey(regionFrom))
+								longerRegionReg[regionFrom] = 0;
+							longerRegionReg[regionFrom]++;
+							longerRegionInsp[regionFrom]++;
 						}
 
 						links = new List<string>();
