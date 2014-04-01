@@ -67,9 +67,9 @@ namespace CourseWork
 		}
 	}
 
-	static class Program
+	internal static class Program
 	{
-		static void Main()
+		private static void Main()
 		{
 			var seq = new Sequences("BG.all.v2.sort");
 			seq.Counting();
@@ -81,78 +81,18 @@ namespace CourseWork
 		{
 			var ss = new Sequences("BG.all.v2.sort");
 			var strs = File.ReadAllLines("BG.edges")
-				.GroupBy(x => ss.RightRegion(x.Substring(4, 2)))
-				.Select(x =>
-					new
-					{
-						reg = x.Key,
-						sumK = x.GroupBy(y => y.Substring(4, 4))
-					.Select(g => Math.Pow(g.Count(), 2))
-					.Sum()
-					})
-					.Select(q => q.reg + "	" + q.sumK);
+			               .GroupBy(x => ss.RightRegion(x.Substring(4, 2)))
+			               .Select(x =>
+			                       new
+				                       {
+					                       reg = x.Key,
+					                       sumK = x.GroupBy(y => y.Substring(4, 4))
+					                               .Select(g => Math.Pow(g.Count(), 2))
+					                               .Sum()
+				                       })
+			               .Select(q => q.reg + "	" + q.sumK);
 			File.WriteAllLines("Inspect.Rigth", strs);
 		}
 
-		private static void Old()
-		{
-			Converter.ConvertStandartToRegions("BigGraph", "Big_Graph_Region_v3");
-			Console.WriteLine("Convert to region fineshed");
-			return;
-			var fin = new StreamReader("Big_Graph_Region_v3");
-			var fout = new StreamWriter("Debug_print");
-			var foutData = new StreamWriter("data.gv");
-
-			var dict = new double[9999][];
-
-			for(int i = 0; i < 9999; i++)
-				dict[i] = new double[9999];
-
-
-			while(!fin.EndOfStream)
-			{
-				var readLine = fin.ReadLine();
-				if(readLine == null) continue;
-				var s = readLine.Split(new[] { '-', '>', '	' }, StringSplitOptions.RemoveEmptyEntries);
-				int v1, v2;
-				double v3;
-				Int32.TryParse(s[0], out v1);
-				Int32.TryParse(s[1], out v2);
-				Double.TryParse(s[2], out v3);
-				dict[v1][v2] += v3;
-			}
-
-			for(int i = 1; i < 9999; i++)
-			{
-				double max = 0.0;
-				int ind = -1;
-				string s = "";
-				for(int j = 1; j < 9999; j++)
-				{
-					if(dict[i][j] > max)
-					{
-						max = dict[i][j];
-						ind = j;
-					}
-					if(Math.Abs(dict[i][j] - 0) > 0.00000000000000000000001)
-						s += dict[i][j] + "  ";
-				}
-
-				fout.WriteLine(i + "(" + ind + ") : " + s);
-			}
-
-			for(var i = 1; i < 9999; i++)
-			{
-				for(var j = 1; j < 9999; j++)
-				{
-					if(Math.Abs(dict[i][j] - 0) > 0.00000000000000000000001)
-						foutData.WriteLine(i + "--" + j + "[weight=" + dict[i][j] + "];");
-				}
-			}
-
-			fin.Close();
-			fout.Close();
-			foutData.Close();
-		}
 	}
 }

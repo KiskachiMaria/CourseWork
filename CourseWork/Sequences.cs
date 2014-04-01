@@ -21,10 +21,10 @@ namespace CourseWork
 
 		private readonly Dictionary<string, int> regionsInsp;
 		private readonly Dictionary<string, int> regionsReg;
-		private readonly Dictionary<string, int> regionsCou;
+		private readonly Dictionary<string, int> regionsCountry;
 		private readonly Dictionary<string, double> doubleRegionsInsp;
 		private readonly Dictionary<string, double> doubleRegionsReg;
-		private readonly Dictionary<string, double> doubleRegionsCou;
+		private readonly Dictionary<string, double> doubleRegionsCountry;
 		private readonly Dictionary<string, int> longerRegionInsp;
 		private readonly Dictionary<string, int> longerRegionReg;
 		
@@ -33,10 +33,10 @@ namespace CourseWork
 			this.fname = fname;
 			regionsInsp = new Dictionary<string, int>();
 			regionsReg = new Dictionary<string, int>();
-			regionsCou = new Dictionary<string, int>();
+			regionsCountry = new Dictionary<string, int>();
 			doubleRegionsInsp = new Dictionary<string, double>();
 			doubleRegionsReg = new Dictionary<string, double>();
-			doubleRegionsCou = new Dictionary<string, double>();
+			doubleRegionsCountry = new Dictionary<string, double>();
 			longerRegionInsp = new Dictionary<string, int>();
 			longerRegionReg = new Dictionary<string, int>();
 		}
@@ -57,10 +57,10 @@ namespace CourseWork
 				return "66";
 			if(reg == "98")
 				return "78";
-			if(reg == "50")
-				return "77";
-			if(reg == "47")
-				return "78";
+//			if(reg == "50")
+//				return "77";
+//			if(reg == "47")
+//				return "78";
 //			Питер и Москва с облостями
 			return reg;
 		}
@@ -116,12 +116,12 @@ namespace CourseWork
 							}
 							else
 							{
-								if(!regionsCou.ContainsKey(regionFrom))
-									regionsCou[regionFrom] = 0;
-								regionsCou[regionFrom]++;
-								if(!doubleRegionsCou.ContainsKey(regionFrom))
-									doubleRegionsCou[regionFrom] = 0;
-								doubleRegionsCou[regionFrom] += dummy;
+								if(!regionsCountry.ContainsKey(regionFrom))
+									regionsCountry[regionFrom] = 0;
+								regionsCountry[regionFrom]++;
+								if(!doubleRegionsCountry.ContainsKey(regionFrom))
+									doubleRegionsCountry[regionFrom] = 0;
+								doubleRegionsCountry[regionFrom] += dummy;
 //								if(!regionsCou.ContainsKey(regionTo))
 //									regionsCou[regionTo] = 0;
 //								regionsCou[regionTo]++;
@@ -187,19 +187,45 @@ namespace CourseWork
 
 			PrintDictionary("Regions.p1.insp", regionsInsp);
 			PrintDictionary("Regions.p1.regions", regionsReg);
-			PrintDictionary("Regions.p1.country", regionsCou);
+			PrintDictionary("Regions.p1.country", regionsCountry);
 			PrintDictionary("Regions.p2.insp", doubleRegionsInsp);
 			PrintDictionary("Regions.p2.regions", doubleRegionsReg);
-			PrintDictionary("Regions.p2.country", doubleRegionsCou);
+			PrintDictionary("Regions.p2.country", doubleRegionsCountry);
 			PrintDictionary("Regions.p3.insp", longerRegionInsp);
 			PrintDictionary("Regions.p3.regions", longerRegionReg);
+			PrintAll("Merged", new List<Dictionary<string, double>> { doubleRegionsInsp, doubleRegionsReg, doubleRegionsCountry }, new List<Dictionary<string, int>> { longerRegionInsp, longerRegionReg });
+		}
+
+		private void PrintAll<T1, T2>(string filename, IEnumerable<Dictionary<string, T1>> dictsListFirst, IEnumerable<Dictionary<string, T2>> dictsListSecond)
+		{
+			var bigDict = new Dictionary<string, string>();
+			bigDict = Merged(bigDict, dictsListFirst);
+			bigDict = Merged(bigDict, dictsListSecond);
+			PrintDictionary(filename, bigDict);
+		}
+
+		private Dictionary<string, string> Merged<T>(Dictionary<string, string> bigDict, IEnumerable<Dictionary<string, T>> dictsList)
+		{
+			foreach(var dict in dictsList)
+			{
+				foreach(var key in dict.Keys)
+				{
+					if(!bigDict.ContainsKey(key))
+						bigDict[key] = dict[key].ToString();
+					else
+						bigDict[key] += "\t" + dict[key];
+				}
+			}
+			return bigDict;
 		}
 
 		private void PrintDictionary<T>(string filename, Dictionary<string, T> dict)
 		{
 			using(var file = new StreamWriter(filename))
 			{
-				foreach(var reg in dict.Keys)
+				var keysList = dict.Keys.ToList();
+				keysList.Sort();
+				foreach(var reg in keysList)
 					file.WriteLine(reg + " " + dict[reg]);
 			}
 		}
