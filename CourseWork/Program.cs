@@ -71,18 +71,20 @@ namespace CourseWork
 	{
 		private static void Main()
 		{
-			var seq = new Sequences("BG.all.v2.sort");
-			seq.Counting();
-			seq.WriteInfo();
-			CountSumK();
+			var okvedStat = new OKVEDStatistic();
+			okvedStat.WriteTopOkvedsForRegion("okveds", "okvedsFrequencyRegions");
+			okvedStat.WriteFrequencyOkveds("okveds", "okvedsFrequency");
+//			var seq = new Sequences("BG.all.v2.sort");
+//			seq.Counting();
+//			seq.WriteInfo();
+//			CountSumK();
 
 		}
 
 		private static void CountSumK()
 		{
-			var ss = new Sequences("BG.all.v2.sort");
 			var strs = File.ReadAllLines("edges.sort.uniq")
-			               .GroupBy(x => ss.RightRegion(x.Substring(4, 2)))
+			               .GroupBy(x => Sequences.RightRegion(x.Substring(4, 2)))
 			               .Select(x =>
 			                       new
 				                       {
@@ -94,6 +96,6 @@ namespace CourseWork
 			               .Select(q => q.reg + "	" + q.sumK);
 			File.WriteAllLines("Inspect.Rigth", strs);
 		}
-
+		
 	}
 }

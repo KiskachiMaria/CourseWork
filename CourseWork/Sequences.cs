@@ -41,7 +41,7 @@ namespace CourseWork
 			longerRegionReg = new Dictionary<string, int>();
 		}
 
-		public string RightRegion (string reg)
+		public static string RightRegion (string reg)
 		{
 			if(reg == "81")
 				return "59";
@@ -57,11 +57,12 @@ namespace CourseWork
 				return "66";
 			if(reg == "98")
 				return "78";
-			if(reg == "50")
-				return "77";
-			if(reg == "47")
-				return "78";
 //			Питер и Москва с облостями
+//			if(reg == "50")
+//				return "77";
+//			if(reg == "47")
+//				return "78";
+
 			return reg;
 		}
 
