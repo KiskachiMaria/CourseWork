@@ -72,8 +72,12 @@ namespace CourseWork
 		private static void Main()
 		{
 			var okvedStat = new OKVEDStatistic();
-			okvedStat.WriteTopOkvedsForRegion("okveds", "okvedsFrequencyRegions");
-			okvedStat.WriteFrequencyOkveds("okveds", "okvedsFrequency");
+
+			okvedStat.CountingOKVEDStandartMetrics("okveds", "okveds.edges", "okvedsStandartMetric");
+
+//			okvedStat.WriteTopOkvedsForRegion("okveds", "okvedsFrequencyRegions");
+//			okvedStat.WriteFrequencyOkveds("okveds", "okvedsFrequency");
+
 //			var seq = new Sequences("BG.all.v2.sort");
 //			seq.Counting();
 //			seq.WriteInfo();
