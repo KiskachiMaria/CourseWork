@@ -34,5 +34,10 @@ namespace CourseWork
 				ControlBit = okved.Substring(14, 1);
 			}
 		}
+
+	    public static string GetRegion(string okved)
+	    {
+	        return Sequences.RightRegion(okved.Substring(3, 2));
+	    }
 	}
 }
