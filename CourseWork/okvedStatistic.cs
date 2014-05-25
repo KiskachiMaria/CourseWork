@@ -1,84 +1,95 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 
 namespace CourseWork
 {
-	class OKVEDStatistic
+	internal class OKVEDStatistic
 	{
-
 		public void WriteTopOkvedsForRegion(string inFilename, string outFilename, int topCount = 3)
 		{
 			var result = new Dictionary<string, List<KeyValuePair<string, int>>>();
-			var freq = FrequencyOkvedinDifferentRegion(inFilename);
+			Dictionary<string, Dictionary<string, int>> freq = FrequencyOkvedinDifferentRegion(inFilename);
 			using(var file = new StreamWriter(outFilename))
 			{
-				foreach(var region in freq.Keys)
+				foreach(string region in freq.Keys)
 				{
 					result[region] = freq[region].OrderBy(x => x.Value).Reverse().Take(topCount).ToList();
-					var topOkveds = result[region].Aggregate("", (current, pair) => current + (pair.Key + " "));
+					string topOkveds = result[region].Aggregate("", (current, pair) => current + (pair.Key + " "));
 					file.WriteLine(region + "	" + topOkveds);
 				}
 			}
 		}
 
-        public void WriteRegionEdgesForOkvedinRegion(string inFilenameOkveds, string inFilenameEdges, string outFilename, bool isInside, int topCount = 100)
-        {
-            var topOkveds = new Dictionary<string, List<string>>();
-            var freq = FrequencyOkvedinDifferentRegion(inFilenameOkveds);
-            var mainOkved = new Dictionary<string, string>();
-            var countEdges = new Dictionary<string, Dictionary<string, int>>();
+		public void WriteRegionEdgesForOkvedinRegion(string inFilenameOkveds, string inFilenameEdges, string outFilename, bool isInside, int topCount = 100)
+		{
+			var topOkveds = new Dictionary<string, List<string>>();
+			Dictionary<string, Dictionary<string, int>> freq = FrequencyOkvedinDifferentRegion(inFilenameOkveds);
+			var mainOkved = new Dictionary<string, string>();
+			var countEdges = new Dictionary<string, Dictionary<string, int>>();
 
-            foreach (var region in freq.Keys)
-                topOkveds[region] = freq[region].OrderBy(x => x.Value).Reverse().Take(topCount).Select(x => x.Key).ToList();
-            using (var file = new StreamReader(inFilenameOkveds))
-            {
-                string str;
+			foreach(string region in freq.Keys)
+				topOkveds[region] = freq[region].OrderBy(x => x.Value).Reverse().Take(topCount).Select(x => x.Key).ToList();
+			using(var file = new StreamReader(inFilenameOkveds))
+			{
+				string str;
 				while((str = file.ReadLine()) != null)
 				{
-					var args = str.Split('\t');
-					var ogrn = args[0]; 
-					var okveds = new List<string>(args[1].Split(','));
-					mainOkved[ogrn] = okveds[0];
+					string[] args = str.Split('\t');
+					string ogrn = args[0];
+					mainOkved[ogrn] = args[1].Split(',')[0];
 				}
 			}
 
-            using (var file = new StreamReader(inFilenameEdges))
-            {
-                string str;
-                while ((str = file.ReadLine()) != null)
-                {
-                    var edge = new Edge(str);
-                    if (!mainOkved.ContainsKey(edge.From) || !mainOkved.ContainsKey(edge.To))
-                        continue;
+			for(int i = 0; i < 100; i++)
+			{
+				string iStr;
+				if(i < 10)
+					iStr = "0" + i;
+				else
+					iStr = i.ToString(CultureInfo.InvariantCulture);
+				countEdges[iStr] = new Dictionary<string, int>();
+			}
 
-                    string regionFrom = OGRN.GetRegion(edge.From);
-                    string regionTo = OGRN.GetRegion(edge.To);
-                    string okvedFrom = mainOkved[edge.From];
-                    string okvedTo = mainOkved[edge.To];
+			foreach(string region in countEdges.Keys)
+				foreach(string okved in topOkveds[region])
+					countEdges[region][okved] = 0;
 
-                    if (!topOkveds[regionFrom].Contains(okvedFrom) || !topOkveds[regionTo].Contains(okvedTo)) 
-                        continue;
-                    
-                    if (isInside && regionFrom == regionTo)
-                        countEdges[regionFrom][okvedFrom]++;
-                    if (!isInside && regionFrom != regionTo)
-                        countEdges[regionFrom][okvedFrom]++;
-                }
-            }
+			using(var file = new StreamReader(inFilenameEdges))
+			{
+				string str;
+				while((str = file.ReadLine()) != null)
+				{
+					var edge = new Edge(str);
+					if(!mainOkved.ContainsKey(edge.From) || !mainOkved.ContainsKey(edge.To))
+						continue;
 
-            using (var file = new StreamWriter(outFilename))
-            {
-                foreach (var region in countEdges.Keys)
-                {
-                    foreach (var okved in countEdges[region].Keys)
-                        file.Write(countEdges[region][okved] + "\t");
-                    file.WriteLine();
-                }
-            }
+					var regionFrom = OGRN.GetRegion(edge.From);
+					var regionTo = OGRN.GetRegion(edge.To);
+					var okvedFrom = mainOkved[edge.From];
 
-        }
+					if(!topOkveds[regionFrom].Contains(okvedFrom))
+						continue;
+
+					if(isInside && regionFrom == regionTo)
+						countEdges[regionFrom][okvedFrom]++;
+					if(!isInside && regionFrom != regionTo)
+						countEdges[regionFrom][okvedFrom]++;
+				}
+			}
+
+			using(var file = new StreamWriter(outFilename))
+			{
+				foreach(string region in countEdges.Keys)
+				{
+					foreach(string okved in countEdges[region].Keys)
+						file.Write(countEdges[region][okved] + "\t");
+					file.WriteLine();
+				}
+			}
+		}
 
 		private Dictionary<string, Dictionary<string, int>> FrequencyOkvedinDifferentRegion(string filename)
 		{
@@ -97,8 +108,8 @@ namespace CourseWork
 				string str;
 				while((str = file.ReadLine()) != null)
 				{
-					var args = str.Split('\t');
-					var ogrn = new OGRN(args[0]); 
+					string[] args = str.Split('\t');
+					var ogrn = new OGRN(args[0]);
 					var okveds = new List<string>(args[1].Split(','));
 					if(!freq[ogrn.Region].ContainsKey(okveds[0])) //Берем только основной оквед
 						freq[ogrn.Region][okveds[0]] = 0;
@@ -108,7 +119,6 @@ namespace CourseWork
 			return freq;
 		}
 
-
 		private IEnumerable<KeyValuePair<string, int>> CountingFrequencyOkveds(string inFilename)
 		{
 			var freq = new Dictionary<string, int>();
@@ -117,7 +127,7 @@ namespace CourseWork
 				string str;
 				while((str = file.ReadLine()) != null)
 				{
-					var args = str.Split('\t');
+					string[] args = str.Split('\t');
 					var okveds = new List<string>(args[1].Split(',')); //Берем только основной оквед
 					if(!freq.ContainsKey(okveds[0]))
 						freq[okveds[0]] = 0;
@@ -129,16 +139,18 @@ namespace CourseWork
 
 		public void WriteFrequencyOkveds(string inFilename, string outFilename)
 		{
-			var freq = CountingFrequencyOkveds(inFilename);
+			IEnumerable<KeyValuePair<string, int>> freq = CountingFrequencyOkveds(inFilename);
 			using(var file = new StreamWriter(outFilename))
 				foreach(var pair in freq)
 					file.WriteLine(pair.Key + "	" + pair.Value);
 		}
+
 		private const string OtherOKVED = "\"666\"";
+
 		public void CountingOKVEDStandartMetrics(string inFilenameOkveds, string inFilenameEdges, string outFilename)
 		{
-			var freq = CountingFrequencyOkveds(inFilenameOkveds).Take(500).ToList();
-			var freqDict = freq.ToDictionary(pair => pair.Key, pair => pair.Value);
+			List<KeyValuePair<string, int>> freq = CountingFrequencyOkveds(inFilenameOkveds).Take(500).ToList();
+			Dictionary<string, int> freqDict = freq.ToDictionary(pair => pair.Key, pair => pair.Value);
 			var internalEdges = new Dictionary<string, double>();
 			var externalEdges = new Dictionary<string, double>();
 			freqDict[OtherOKVED] = 0;
@@ -160,7 +172,7 @@ namespace CourseWork
 					}
 
 					if(!internalEdges.ContainsKey(edge.From))
-					{	
+					{
 						internalEdges[edge.From] = 0;
 						externalEdges[edge.From] = 0;
 					}
@@ -174,12 +186,11 @@ namespace CourseWork
 
 			using(var writer = new StreamWriter(outFilename))
 			{
-				foreach(var key in internalEdges.Keys.Concat(externalEdges.Keys).Distinct())
+				foreach(string key in internalEdges.Keys.Concat(externalEdges.Keys).Distinct())
 				{
-					
-					var inter =  internalEdges.ContainsKey(key) ? internalEdges[key] : 0;
-					var exter =  externalEdges.ContainsKey(key) ? externalEdges[key] : 0;
-					var fr = freqDict.ContainsKey(key) ? freqDict[key] : 0;
+					double inter = internalEdges.ContainsKey(key) ? internalEdges[key] : 0;
+					double exter = externalEdges.ContainsKey(key) ? externalEdges[key] : 0;
+					int fr = freqDict.ContainsKey(key) ? freqDict[key] : 0;
 					writer.WriteLine(key + '\t' + inter + '\t' + exter + '\t' + fr);
 				}
 			}
@@ -191,11 +202,16 @@ namespace CourseWork
 		public string From;
 		public string To;
 		public double Ves;
+
 		public Edge(string edge)
 		{
-			var e = edge.Split('\t');
+			string[] e = edge.Split(new[] {'\t', ' ', '>', '-'}, StringSplitOptions.RemoveEmptyEntries);
+			if(e[0][0] == 'f')
+				e[0] = e[0].Substring(1);
+			if(e[1][0] == 'f')
+				e[1] = e[1].Substring(1);
 			if(e.Count() == 3)
-			{	
+			{
 				From = e[0];
 				To = e[1];
 				Ves = double.Parse(e[2], NumberStyles.Any, CultureInfo.InvariantCulture);
@@ -207,5 +223,4 @@ namespace CourseWork
 			}
 		}
 	}
-
 }
