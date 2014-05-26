@@ -74,8 +74,8 @@ namespace CourseWork
 			var okvedStat = new OKVEDStatistic();
 
 //			okvedStat.CountingOKVEDStandartMetrics("okveds", "okveds.edges", "okvedsStandartMetric");
-			okvedStat.WriteRegionEdgesForOkvedinRegion("okveds", "BG.all.v2.sort", "okvedsNevedomayaHrenInside", true);
-			okvedStat.WriteRegionEdgesForOkvedinRegion("okveds", "BG.all.v2.sort", "okvedsNevedomayaHrenOutside", false);
+			okvedStat.WriteRegionEdgesForOkvedinRegionSimple("okveds", "BG.all.v2.sort", "okvedsNevedomayaHrenInside.simple", true);
+			okvedStat.WriteRegionEdgesForOkvedinRegionSimple("okveds", "BG.all.v2.sort", "okvedsNevedomayaHrenOutside.simple", false);
 
 //			okvedStat.WriteTopOkvedsForRegion("okveds", "okvedsFrequencyRegions");
 //			okvedStat.WriteFrequencyOkveds("okveds", "okvedsFrequency");

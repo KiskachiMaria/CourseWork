@@ -23,6 +23,77 @@ namespace CourseWork
 			}
 		}
 
+		public void WriteRegionEdgesForOkvedinRegionSimple(string inFilenameOkveds, string inFilenameEdges, string outFilename, bool isInside, int topCount = 100)
+		{
+			var topOkveds = CountingFrequencyOkveds(inFilenameOkveds).Take(500).Select(x => x.Key).ToList();
+			var mainOkved = new Dictionary<string, string>();
+			var countEdges = new Dictionary<string, Dictionary<string, int>>();
+
+			using(var file = new StreamReader(inFilenameOkveds))
+			{
+				string str;
+				while((str = file.ReadLine()) != null)
+				{
+					string[] args = str.Split('\t');
+					string ogrn = args[0];
+					mainOkved[ogrn] = args[1].Split(',')[0];
+				}
+			}
+
+			for(int i = 0; i < 100; i++)
+			{
+				string iStr;
+				if(i < 10)
+					iStr = "0" + i;
+				else
+					iStr = i.ToString(CultureInfo.InvariantCulture);
+				countEdges[iStr] = new Dictionary<string, int>();
+			}
+
+			foreach(string region in countEdges.Keys)
+				foreach(string okved in topOkveds)
+					countEdges[region][okved] = 0;
+
+			using(var file = new StreamReader(inFilenameEdges))
+			{
+				string str;
+				while((str = file.ReadLine()) != null)
+				{
+					var edge = new Edge(str);
+					if(!mainOkved.ContainsKey(edge.From) || !mainOkved.ContainsKey(edge.To))
+						continue;
+
+					var regionFrom = OGRN.GetRegion(edge.From);
+					var regionTo = OGRN.GetRegion(edge.To);
+					var okvedFrom = mainOkved[edge.From];
+
+					if(!topOkveds.Contains(okvedFrom))
+						continue;
+
+					if(isInside && regionFrom == regionTo)
+						countEdges[regionFrom][okvedFrom]++;
+					if(!isInside && regionFrom != regionTo)
+						countEdges[regionFrom][okvedFrom]++;
+				}
+			}
+
+			using(var file = new StreamWriter(outFilename))
+			{
+				foreach(var okved in topOkveds)
+					file.Write(okved + "\t");
+				file.WriteLine();
+				foreach(var region in countEdges.Keys)
+				{
+					file.Write(region + "\t\t");
+					foreach(string okved in countEdges[region].Keys)
+					{
+						file.Write(countEdges[region][okved] + "\t");
+					}
+					file.WriteLine();
+				}
+			}
+		}
+
 		public void WriteRegionEdgesForOkvedinRegion(string inFilenameOkveds, string inFilenameEdges, string outFilename, bool isInside, int topCount = 100)
 		{
 			var topOkveds = new Dictionary<string, List<string>>();
@@ -84,9 +155,15 @@ namespace CourseWork
 			{
 				foreach(string region in countEdges.Keys)
 				{
+					string str2;
+					var str1 = str2 = region + "\t\t";
 					foreach(string okved in countEdges[region].Keys)
-						file.Write(countEdges[region][okved] + "\t");
-					file.WriteLine();
+					{
+						str1 += okved + "\t";
+						str2 += countEdges[region][okved] + "\t";
+					}
+					file.WriteLine(str1);
+					file.WriteLine(str2);
 				}
 			}
 		}
